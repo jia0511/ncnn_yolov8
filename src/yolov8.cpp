@@ -435,58 +435,59 @@ static void draw_objects(const cv::Mat& image, const std::vector<Object>& object
 
 int main(int argc, char** argv)
 {
-    // if (argc != 2)
-    // {
-    //     fprintf(stderr, "Usage: %s [imagepath]\n", argv[0]);
-    //     return -1;
-    // }
+    if (argc <1)
+    {
+        fprintf(stderr, "Usage: %s [input type][image path]\n", argv[0]);
+        return -1;
+    }
  
-    // const char* imagepath = argv[2];
-    // int input_type= (int)argv[1][0];
-    cv::Mat input;
-    // if(input_type==0){
-    cv::VideoCapture cap(0);
-    while(cap.read(input)){
-        // if (input.empty())
-        // {
-        //     fprintf(stderr, "cv::imread %s failed\n", imagepath);
-        //     return -1;
-        // }
+    const char* imagepath = argv[2];
+    const char* input_type= argv[1];
+
+    cv::Mat image;
+    if(strcmp(input_type,"video")==0){
+        cv::VideoCapture cap(0);
+        while(cap.read(image)){
+            if (image.empty())
+            {
+                fprintf(stderr, "cv::imread %s failed\n", imagepath);
+                return -1;
+            }
+
+            std::vector<Object> objects;
+            detect_yolov8(image, objects);
+            draw_objects(image, objects);
+            std::vector<Object> tmp;
+            objects.swap(tmp);
+            
+            cv::imshow("image", image);
+            if(cv::waitKey(1)==27){
+                break;
+            }
+
+        }
+
+    }else if(strcmp(input_type,"image")==0){
+        // cv::Mat m = cv::imread(imagepath, 1);
+        image = cv::imread(imagepath, 1);
+        if (image.empty())
+        {
+            fprintf(stderr, "cv::imread %s failed\n", imagepath);
+            return -1;
+        }
 
         std::vector<Object> objects;
-        detect_yolov8(input, objects);
-        draw_objects(input, objects);
+        detect_yolov8(image, objects);
+        draw_objects(image, objects);
         std::vector<Object> tmp;
         objects.swap(tmp);
-        
-        cv::imshow("image", input);
-        if(cv::waitKey(1)==27){
-            break;
+
+        cv::imshow("image", image);
+        if(cv::waitKey(0)==27){
+            return 0; 
         }
 
     }
-
-    // }else if(input_type==1){
-    //     cv::Mat m = cv::imread(imagepath, 1);
-    //     if (m.empty())
-    //     {
-    //         fprintf(stderr, "cv::imread %s failed\n", imagepath);
-    //         return -1;
-    //     }
-
-    //     std::vector<Object> objects;
-    //     detect_yolov8(m, objects);
-    //     draw_objects(m, objects);
-    //     std::vector<Object> tmp;
-    //     objects.swap(tmp);
-
-        // cv::imshow("image", input);
-        // if(cv::waitKey(0)==27){
-        //     return 0; 
-        // }
-
-    // }
     
-
     return 0;
 }
