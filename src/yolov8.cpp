@@ -250,7 +250,7 @@ static void generate_proposals(std::vector<GridAndStride> grid_strides, const nc
 static int detect_yolov8(const cv::Mat& bgr, std::vector<Object>& objects)
 {
     ncnn::Net yolov8;
-    printf("enter detect module!\n");
+
     yolov8.opt.use_vulkan_compute = false;
     // yolov7.opt.use_bf16_storage = true;
 
@@ -350,7 +350,7 @@ static int detect_yolov8(const cv::Mat& bgr, std::vector<Object>& objects)
     return 0;
 }
 
-static void draw_objects(const cv::Mat& bgr, const std::vector<Object>& objects)
+static void draw_objects(const cv::Mat& image, const std::vector<Object>& objects)
 {
     // static const char* class_names[] = {
     //     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
@@ -393,7 +393,7 @@ static void draw_objects(const cv::Mat& bgr, const std::vector<Object>& objects)
 
     int color_index = 0;
 
-    cv::Mat image = bgr.clone();
+    // cv::Mat image = bgr.clone();
 
     for (size_t i = 0; i < objects.size(); i++)
     {
@@ -428,34 +428,65 @@ static void draw_objects(const cv::Mat& bgr, const std::vector<Object>& objects)
         cv::putText(image, text, cv::Point(x, y + label_size.height),
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255));
     }
-
-    cv::imshow("image", image);
-    cv::waitKey(0);
+    // cv::imshow("image", image);
+    // cv::waitKey(1);
 }
 
 
 int main(int argc, char** argv)
 {
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: %s [imagepath]\n", argv[0]);
-        return -1;
-    }
+    // if (argc != 2)
+    // {
+    //     fprintf(stderr, "Usage: %s [imagepath]\n", argv[0]);
+    //     return -1;
+    // }
  
-    const char* imagepath = argv[1];
+    // const char* imagepath = argv[2];
+    // int input_type= (int)argv[1][0];
+    cv::Mat input;
+    // if(input_type==0){
+    cv::VideoCapture cap(0);
+    while(cap.read(input)){
+        // if (input.empty())
+        // {
+        //     fprintf(stderr, "cv::imread %s failed\n", imagepath);
+        //     return -1;
+        // }
 
+        std::vector<Object> objects;
+        detect_yolov8(input, objects);
+        draw_objects(input, objects);
+        std::vector<Object> tmp;
+        objects.swap(tmp);
+        
+        cv::imshow("image", input);
+        if(cv::waitKey(1)==27){
+            break;
+        }
 
-    cv::Mat m = cv::imread(imagepath, 1);
-    if (m.empty())
-    {
-        fprintf(stderr, "cv::imread %s failed\n", imagepath);
-        return -1;
     }
 
-    std::vector<Object> objects;
-    detect_yolov8(m, objects);
+    // }else if(input_type==1){
+    //     cv::Mat m = cv::imread(imagepath, 1);
+    //     if (m.empty())
+    //     {
+    //         fprintf(stderr, "cv::imread %s failed\n", imagepath);
+    //         return -1;
+    //     }
 
-    draw_objects(m, objects);
+    //     std::vector<Object> objects;
+    //     detect_yolov8(m, objects);
+    //     draw_objects(m, objects);
+    //     std::vector<Object> tmp;
+    //     objects.swap(tmp);
+
+        // cv::imshow("image", input);
+        // if(cv::waitKey(0)==27){
+        //     return 0; 
+        // }
+
+    // }
+    
 
     return 0;
 }
