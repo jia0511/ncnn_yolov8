@@ -1,7 +1,6 @@
 # ncnn_yolov8
 
 A  project that implements hand gesture recognition based on yolov8 and deployed it by ncnn.
-Training dataset is [HaGRID](https://github.com/hukenovs/hagrid), it contains 19 gestures.
 
 ## Getting Started
 
